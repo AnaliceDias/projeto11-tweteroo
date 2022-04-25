@@ -6,14 +6,7 @@ app.use(cors());
 app.use(json());
 
 let usuarios = [];
-
-let tweets = [
-    {
-        username: "bobesponja",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub",
-    }
-]
+let tweets = []
 
 app.post("/sign-up", (req, res) => {
     const {username , avatar} = req.body;
@@ -22,7 +15,45 @@ app.post("/sign-up", (req, res) => {
 })
 
 app.get("/tweets" , (req , res) => {
+    let ultimosDezTweets =[];
+    let avatares = [];
+    let sendTweets = [];
+
+    if (tweets.length < 10){
+        ultimosDezTweets = [...tweets]; 
+        ultimosDezTweets.reverse();
+    }else{
+        for (let i = (tweets.length - 10); i < tweets.length; i++){
+            ultimosDezTweets.push(tweets[i]);
+        }
+        ultimosDezTweets.reverse();
+    }
+
+    for(let i = 0; i < ultimosDezTweets.length; i++){
+        for ( let j = 0; j < usuarios.length; j++){
+            if(usuarios[j].username === ultimosDezTweets[i].username){
+                avatares.push(usuarios[j].avatar);
+            } 
+        }   
+    }
+
+    for(let i = 0; i < ultimosDezTweets.length; i++){
+        sendTweets.push({
+            username: ultimosDezTweets[i].username,
+            avatar: avatares[i],
+            tweet: ultimosDezTweets[i].tweet
+        })
+    }    
+
+    res.send(sendTweets); //como retorno "OK" nesse caso?
+})
+
+app.post("/tweets" , (req, res) => {
+    const {username , tweet} = req.body;
     let sendTweets =[];
+
+    tweets.push({username , tweet});
+
     if (tweets.length < 10){
         sendTweets = [...tweets];
     }else{
@@ -31,13 +62,8 @@ app.get("/tweets" , (req , res) => {
         }
     }
     
-    res.send(tweets);
-})
-
-app.post("/tweets/:username" , (req, res) => {
-    const {username , tweet} = req.params;
-    console.log({username , tweet});
-    //tweets.push();
+    sendTweets.reverse();
+    res.send(sendTweets);  
 })
 
 app.listen(5000);
